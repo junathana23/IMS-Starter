@@ -8,4 +8,10 @@ INSERT INTO `ims`.`customers` (`first_name`, `surname`) VALUES ('jordan', 'harri
  primary key(ID)
  );
  
+ create table Items (ID int auto_increment,
+ ItemName varchar(40) NOT null,
+ ItemPrice double NOT NULL,
+ primary key(ID)
+ );
+ 
  
