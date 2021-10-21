@@ -50,8 +50,10 @@ public class IMS {
 				active = this.customers;
 				break;
 			case ITEM:
+				//active = this.item;
 				break;
 			case ORDER:
+				//active = this.order;
 				break;
 			case STOP:
 				return;
