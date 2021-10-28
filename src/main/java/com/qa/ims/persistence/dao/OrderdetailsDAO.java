@@ -11,9 +11,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.qa.ims.persistence.domain.Order;
 import com.qa.ims.persistence.domain.Customer;
 import com.qa.ims.persistence.domain.Items;
+import com.qa.ims.persistence.domain.Order;
 import com.qa.ims.utils.DBUtils;
 
 public class OrderdetailsDAO implements Dao<Order> {
@@ -33,10 +33,10 @@ public class OrderdetailsDAO implements Dao<Order> {
 		String surname = resultSet.getString("Surname");
 		Customer customer = new Customer(Custid, firstName, surname);
 		
-		Long id = resultSet.getLong("itemId");
+		Long itemid = resultSet.getLong("itemId");
 		String itemName = resultSet.getString("itemName");
 		double itemPrice = resultSet.getDouble("itemPrice");
-		Items item = new Items(id, itemName, itemPrice);
+		Items item = new Items(itemid, itemName, itemPrice);
 		
 		return new Order(Orderid, total, customer,item, itemQuant);
 	}
@@ -50,7 +50,7 @@ public class OrderdetailsDAO implements Dao<Order> {
 		// TODO Auto-generated method stub
 		try (Connection connection = DBUtils.getInstance().getConnection();
 				Statement statement = connection.createStatement();
-				ResultSet resultSet = statement.executeQuery("SELECT * FROM imsorders");) {
+				ResultSet resultSet = statement.executeQuery("SELECT * FROM imsorders INNER JOIN customers on imsorders.custID = customers.custID INNER JOIN items on items.itemID = ");) {
 			List<Order> orderspec = new ArrayList<>();
 			while (resultSet.next()) {
 				orderspec.add(modelFromResultSet(resultSet));
@@ -63,17 +63,51 @@ public class OrderdetailsDAO implements Dao<Order> {
 		return new ArrayList<>();
 		
 	}
-
-	@Override
-	public Order read(Long id) {
-		// TODO Auto-generated method stub
+	
+	public Order readLatest() {
+		try (Connection connection = DBUtils.getInstance().getConnection();
+				Statement statement = connection.createStatement();
+				ResultSet resultSet = statement.executeQuery("SELECT * FROM imsorders ORDER BY id DESC LIMIT 1");) {
+			resultSet.next();
+			return modelFromResultSet(resultSet);
+		} catch (Exception e) {
+			LOGGER.debug(e);
+			LOGGER.error(e.getMessage());
+		}
 		return null;
 	}
 
+
+	@Override
+	public Order read(Long id) {
+		try (Connection connection = DBUtils.getInstance().getConnection();
+				PreparedStatement statement = connection.prepareStatement("SELECT * FROM imsorders WHERE id = ?");) {
+			statement.setLong(1, id);
+			try (ResultSet resultSet = statement.executeQuery();) {
+				resultSet.next();
+				return modelFromResultSet(resultSet);
+			}
+		} catch (Exception e) {
+			LOGGER.debug(e);
+			LOGGER.error(e.getMessage());
+		}
+		return null;
+		
+	}		
+
 	@Override
 	public Order create(Order t) {
-		// TODO Auto-generated method stub
-		return null;
+		try (Connection connection = DBUtils.getInstance().getConnection();
+				PreparedStatement statement = connection
+						.prepareStatement("INSERT INTO imsorders() VALUES (?, ?)");) {
+			statement.setLong(1, t.getCustomer().getId());
+			statement.setLong(2, t.getItem().getItemId());
+			statement.executeUpdate();
+			return readLatest();
+		} catch (Exception e) {
+			LOGGER.debug(e);
+			LOGGER.error(e.getMessage());
+		}		return null;
 	}
 
 	@Override

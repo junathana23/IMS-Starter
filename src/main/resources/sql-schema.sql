@@ -10,3 +10,11 @@ CREATE TABLE IF NOT EXISTS `ims`.`customers` (
     `surname` VARCHAR(40) DEFAULT NULL,
     PRIMARY KEY (`id`)
 );
+
+create table imsorderDetails (detailID int auto_increment Not Null,
+ OrderId int,
+ itemID int,
+ primary key(detailID),
+ foreign key(OrderId) references imsorders(OrderId),
+ foreign key(itemID) references items(itemID)
+ );
